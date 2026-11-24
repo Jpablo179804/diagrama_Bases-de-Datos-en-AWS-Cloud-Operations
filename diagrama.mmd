@@ -1,0 +1,48 @@
+flowchart TD
+    %% Capa Superior: Servicios de Bases de Datos
+    subgraph CAPA_BD ["BASES DE DATOS EN AWS (MÓDULO 06)"]
+        direction LR
+        RDS["Amazon RDS"]
+        AURORA["Amazon Aurora"]
+        DYNAMO["Amazon DynamoDB"]
+        REDSHIFT["Amazon Redshift"]
+    end
+
+    %% Bloque 1: Migración
+    subgraph BLOQUE_1 ["1. MIGRACIÓN A LA NUBE"]
+        direction TB
+        ORIGEN["Punto de partida:<br/>Base de datos vieja en servidores locales o en EC2"]
+        SCT["Paso 1 - AWS SCT:<br/>Traduce el diseño y código de la base de datos<br/>si vas a cambiar de marca (ej. de Oracle a AWS)"]
+        DMS["Paso 2 - AWS DMS:<br/>Mueve todos los datos hacia AWS mientras la app<br/>sigue trabajando casi sin interrupciones"]
+        ORIGEN --> SCT --> DMS
+    end
+
+    %% Bloque 2: Alta Disponibilidad y Rendimiento
+    subgraph BLOQUE_2 ["2. ALTA DISPONIBILIDAD Y VELOCIDAD"]
+        direction TB
+        MULTIAZ["Multi-AZ (RDS / Aurora):<br/>Copia exacta en otro edificio (AZ).<br/>Si la principal falla, toma el mando sola"]
+        REPLICAS["Read Replicas (RDS / Aurora):<br/>Copias extra que atienden consultas de lectura<br/>para no saturar la principal"]
+        GLOBAL["DynamoDB Global Tables:<br/>Copia datos en distintos países para que<br/>cargue rápido desde cualquier lugar"]
+    end
+
+    %% Bloque 3: Monitoreo y Cumplimiento
+    subgraph BLOQUE_3 ["3. VIGILANCIA Y SEGURIDAD"]
+        direction TB
+        CW["Amazon CloudWatch:<br/>Vigila la salud en tiempo real (CPU, memoria,<br/>fallos) y manda alertas si algo sube"]
+        CT["AWS CloudTrail:<br/>Cámara de seguridad que graba quién entró,<br/>qué cambió o quién borró algo"]
+        CFG["AWS Config / Config Rules:<br/>Revisa que todo cumpla las reglas (ej. datos<br/>encriptados y que no sean públicos)"]
+    end
+
+    %% Conexiones principales
+    CAPA_BD --> BLOQUE_1
+    CAPA_BD --> BLOQUE_2
+    CAPA_BD --> BLOQUE_3
+
+    %% Conexiones específicas entre servicios y herramientas
+    DMS -.-> RDS
+    DMS -.-> AURORA
+    RDS --- MULTIAZ
+    AURORA --- MULTIAZ
+    RDS --- REPLICAS
+    AURORA --- REPLICAS
+    DYNAMO --- GLOBAL
